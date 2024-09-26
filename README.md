@@ -1,5 +1,7 @@
 # lingo_panda
 
+## apk to try - https://drive.google.com/drive/folders/1t3SuwoyYPKMT7SE51yicHXXBRPdoBZrS
+
 A new Flutter project.
 
 ## Getting Started
