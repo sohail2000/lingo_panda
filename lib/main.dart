@@ -1,7 +1,15 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:lingo_panda/home_page.dart';
+import 'package:lingo_panda/data/data_sources/comment_remote_data_source.dart';
+import 'package:lingo_panda/data/repositories/comment_repository_impl.dart';
+import 'package:lingo_panda/presentation/provider/comment_provider.dart';
+import 'package:lingo_panda/routing/routes.dart';
+import 'package:lingo_panda/styling/custom_theme.dart';
+import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -10,13 +18,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => CommentProvider(
+            CommentRepositoryImpl(CommentRemoteDataSource()),
+          ),
+        ),
+      ],
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: true,
+        routerConfig: RoutingUtils.buildGoRouter(),
+        theme: CustomTheme.theme,
       ),
-      home: HomePage(),
     );
   }
 }
