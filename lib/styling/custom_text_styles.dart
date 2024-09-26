@@ -90,10 +90,27 @@ class CustomTextStyle {
   // ***---*** black ***---*** 
 
   // regular
-  static const TextStyle blackRegular12 = TextStyle(
+
+  static const TextStyle blackRegular14 = TextStyle(
     fontFamily: 'Poppins',
     color: CustomColors.black,
-    fontSize: 12,
+    fontSize: 14,
+    fontWeight: CustomFontWeight.regular,
+  );
+
+  // medium
+
+  // bold
+
+
+  // ***---*** white ***---*** 
+
+  // regular
+
+  static const TextStyle whiteRegular14 = TextStyle(
+    fontFamily: 'Poppins',
+    color: CustomColors.white,
+    fontSize: 14,
     fontWeight: CustomFontWeight.regular,
   );
 

@@ -1,14 +1,10 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lingo_panda/components/custom_text_field.dart';
-import 'package:lingo_panda/presentation/screens/comments_screen.dart';
+import 'package:lingo_panda/common_widgets/custom_button.dart';
+import 'package:lingo_panda/common_widgets/custom_text_field.dart';
 import 'package:lingo_panda/routing/routes.dart';
-import 'package:lingo_panda/styling/custom_colors.dart';
 import 'package:lingo_panda/styling/custom_text_styles.dart';
-import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,21 +17,45 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final _formKey = GlobalKey<FormState>();
   String errorMessage = '';
 
   Future<void> _login() async {
-    try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      print("Logged in as ${userCredential.user!.email}");
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        errorMessage = e.message!;
-      });
+    if (_formKey.currentState!.validate()) {
+      try {
+        UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+        print("Logged in as ${userCredential.user!.email}");
+        context.go(Routes.comments);
+      } on FirebaseAuthException catch (e) {
+        setState(() {
+          errorMessage = e.message!;
+        });
+      }
     }
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Email cannot be empty';
+    }
+    const emailPattern = r'^[a-zA-Z0-9._]+@[a-zA-Z0-9]+\.[a-zA-Z]+';
+    if (!RegExp(emailPattern).hasMatch(value)) {
+      return 'Enter a valid email';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password cannot be empty';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+    return null;
   }
 
   @override
@@ -50,51 +70,55 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CustomTextField(emailController: _emailController, hintText: 'Email'),
-            const SizedBox(height: 10),
-            CustomTextField(emailController: _passwordController, hintText: 'Password', obscureText: true,),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                _login().then((_) => context.go(Routes.comments));
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: CustomColors.blue,
-                textStyle: TextStyle(color: Colors.white),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 100, vertical: 12),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              const Spacer(flex: 2),
+              CustomTextField(
+                emailController: _emailController,
+                hintText: 'Email',
+                keyboardType: TextInputType.emailAddress,
+                validator: _validateEmail,
               ),
-              child: const Text('Login'),
-            ),
-            if (errorMessage.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Text(errorMessage,
-                    style: const TextStyle(color: Colors.red)),
+              const SizedBox(height: 20),
+              CustomTextField(
+                emailController: _passwordController,
+                hintText: 'Password',
+                obscureText: true,
+                validator: _validatePassword,
               ),
-            const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () {
-                context.go(Routes.signup);
-              },
-              child: const Text.rich(
-                TextSpan(
-                  text: 'New here? ',
-                  children: [
-                    TextSpan(
-                        text: 'Signup', style: CustomTextStyle.darkBlueBold16),
-                  ],
+              if (errorMessage.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Text(errorMessage,
+                      style: const TextStyle(color: Colors.red)),
+                ),
+              const Spacer(flex: 4),
+              CustomButton(
+                text: 'Login',
+                onPressed: _login,
+              ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: () => context.go(Routes.signup),
+                child: const Text.rich(
+                  TextSpan(
+                    text: 'New here? ',
+                    style: CustomTextStyle.blackRegular14,
+                    children: [
+                      TextSpan(
+                          text: 'Signup',
+                          style: CustomTextStyle.darkBlueBold16),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+              const Spacer(flex: 1),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
-

@@ -6,4 +6,5 @@ class CustomColors {
   static const Color lightGrey = Color(0xFFF5F9FD); 
   static const Color grey = Color(0xFFCED3DC); 
   static const Color black = Color.fromARGB(255, 0, 0, 0); 
+  static const Color white = Color.fromARGB(255, 255, 255, 255); 
 }
