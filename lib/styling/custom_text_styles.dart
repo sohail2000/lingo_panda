@@ -61,10 +61,10 @@ class CustomTextStyle {
   // ***---*** light-grey ***---*** 
 
   // regular
-  static const TextStyle lightGreyRegular12 = TextStyle(
+  static const TextStyle lightGreyRegular14 = TextStyle(
     fontFamily: 'Poppins',
-    color: CustomColors.blue,
-    fontSize: 12,
+    color: CustomColors.grey,
+    fontSize: 14,
     fontWeight: CustomFontWeight.regular,
   );
 
@@ -91,16 +91,22 @@ class CustomTextStyle {
 
   // regular
 
+  static const TextStyle blackBold18 = TextStyle(
+    fontFamily: 'Poppins',
+    color: CustomColors.black,
+    fontSize: 18,
+    fontWeight: CustomFontWeight.bold,
+  );
+
+  // medium
+
+  // bold
   static const TextStyle blackRegular14 = TextStyle(
     fontFamily: 'Poppins',
     color: CustomColors.black,
     fontSize: 14,
     fontWeight: CustomFontWeight.regular,
   );
-
-  // medium
-
-  // bold
 
 
   // ***---*** white ***---*** 
@@ -117,6 +123,12 @@ class CustomTextStyle {
   // medium
 
   // bold
+  static const TextStyle whiteBold24 = TextStyle(
+    fontFamily: 'Poppins',
+    color: CustomColors.white,
+    fontSize: 24,
+    fontWeight: CustomFontWeight.bold,
+  );
 
 
 }

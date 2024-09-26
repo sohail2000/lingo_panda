@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lingo_panda/data/models/comment_model.dart';
 import 'package:lingo_panda/presentation/provider/comment_provider.dart';
+import 'package:lingo_panda/presentation/ui/comments_ui.dart';
 import 'package:lingo_panda/routing/routes.dart';
 import 'package:lingo_panda/styling/custom_colors.dart';
+import 'package:lingo_panda/styling/custom_text_styles.dart';
+import 'package:lingo_panda/utlis/remote_config.dart';
 import 'package:provider/provider.dart';
 
 class CommentsScreen extends StatefulWidget {
@@ -17,16 +20,20 @@ class CommentsScreen extends StatefulWidget {
 class _CommentsScreenState extends State<CommentsScreen> {
   final ScrollController _scrollController = ScrollController();
   static const int totalComments = 500;
+  bool shouldMaskEmail = true;
 
   @override
   void initState() {
     super.initState();
 
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
       if (user == null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           context.go(Routes.login);
         });
+      }else{
+        shouldMaskEmail = await getEmailMaskingSetting();
+        print('shouldMaskEmail ${shouldMaskEmail}');
       }
     });
 
@@ -54,37 +61,12 @@ class _CommentsScreenState extends State<CommentsScreen> {
     super.dispose();
   }
 
-  // Logout function
-  Future<void> _logout() async {
-    await FirebaseAuth.instance.signOut();
-  }
-
-  // Show logout confirmation dialog
+  
   void _showLogoutDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: CustomColors.lightGrey,
-          surfaceTintColor: CustomColors.lightGrey,
-          title: const Text('Logout'),
-          content: const Text('Are you sure you want to log out?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await _logout(); // Call the logout function
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Logout'),
-            ),
-          ],
-        );
+        return const LogoutConfirmationDialog();
       },
     );
   }
@@ -93,11 +75,14 @@ class _CommentsScreenState extends State<CommentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Comments'),
-        backgroundColor: Colors.blue,
+        title: const Text(
+          'Comments',
+          style: CustomTextStyle.whiteBold24,
+        ),
+        backgroundColor: CustomColors.blue,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.logout, color: Colors.white,),
             onPressed: _showLogoutDialog,
           ),
         ],
@@ -125,101 +110,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
               }
 
               final CommentModel comment = commentProvider.comments[index];
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Card(
-                  color: CustomColors.lightGrey,
-                  // surfaceTintColor: CustomColors.lightGrey,
-                  elevation: 0.0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: Colors.grey[400],
-                          child: Text(
-                            comment.name[0].toUpperCase(),
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              RichText(
-                                text: TextSpan(
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 14,
-                                  ),
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Name: ',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: comment.name,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              RichText(
-                                text: TextSpan(
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 14,
-                                  ),
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Email: ',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: comment.email,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                comment.body,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black87,
-                                ),
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
+              return CommentItem(comment: comment, shouldMaskEmail: shouldMaskEmail,);
             },
           );
         },
@@ -227,3 +118,4 @@ class _CommentsScreenState extends State<CommentsScreen> {
     );
   }
 }
+
